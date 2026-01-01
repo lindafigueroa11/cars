@@ -24,9 +24,9 @@ builder.Services.AddScoped<IRepository<Car>, CarRepository>();
 
 builder.Services.AddDbContext<StoreContext>(options =>
 {
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("StoreConnection")
-    );
+    options.UseNpgsql(
+    builder.Configuration.GetConnectionString("StoreConnection")
+);
 });
 builder.Services.AddKeyedScoped<ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>, CarService>("carService");
 
@@ -46,13 +46,8 @@ var app = builder.Build();
 // =====================
 // PIPELINE
 // =====================
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
