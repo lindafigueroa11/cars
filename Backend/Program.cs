@@ -5,7 +5,6 @@ using Backend.Services;
 using Backend.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // SERVICIOS
 // =====================
 
+// Servicios propios
 builder.Services.AddSingleton<ICocheService, CocheService>();
 
 builder.Services.AddHttpClient<IPostsService, PostsService>(c =>
@@ -22,18 +22,22 @@ builder.Services.AddHttpClient<IPostsService, PostsService>(c =>
 
 builder.Services.AddScoped<IRepository<Car>, CarRepository>();
 
+builder.Services.AddKeyedScoped<
+    ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>,
+    CarService>("carService");
+
+// DbContext con PostgreSQL (Render)
 builder.Services.AddDbContext<StoreContext>(options =>
 {
     options.UseNpgsql(
-    builder.Configuration.GetConnectionString("StoreConnection")
-);
+        builder.Configuration.GetConnectionString("StoreConnection")
+    );
 });
-builder.Services.AddKeyedScoped<ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>, CarService>("carService");
 
 // Controllers
 builder.Services.AddControllers();
 
-// ✅ REGISTRO MANUAL DEL VALIDATOR (100% válido en .NET 8)
+// FluentValidation
 builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
 builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
 
@@ -41,14 +45,30 @@ builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// =====================
+// BUILD
+// =====================
+
 var app = builder.Build();
 
 // =====================
 // PIPELINE
 // =====================
+
+// 🔥 Swagger SIEMPRE activo (Render = Production)
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// HTTPS redirection (opcional en Render, no rompe nada)
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
+
+// 🔑 Mapea los controllers (OBLIGATORIO)
 app.MapControllers();
+
+// =====================
+// RUN
+// =====================
+
 app.Run();
