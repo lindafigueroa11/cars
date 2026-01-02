@@ -1,12 +1,12 @@
 ﻿namespace Backend.Repository
 {
-    public interface IRepository<IEntity>
+    public interface IRepository<TEntity>
     {
-        Task<IEnumerable<IEntity>> Get();
-        Task<IEntity> GetById(int Id);
-        Task Add(IEntity entity);
-        void Update(IEntity entity);
-        void Delete(IEntity entity);
+        Task<IEnumerable<TEntity>> Get();
+        Task<TEntity?> GetById(int id);
+        Task Add(TEntity entity);
+        void Update(TEntity entity);
+        void Delete(TEntity entity);
         Task Save();
     }
 }

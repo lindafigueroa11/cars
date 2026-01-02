@@ -1,44 +1,38 @@
 ﻿using Backend.DTOs;
 using Backend.Models;
 using Backend.Repository;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
 {
     public class CarService : ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>
     {
-        private readonly IRepository<Car> _carRepository;
+        private readonly IRepository<Car> _repository;
 
-        public CarService(IRepository<Car> carRepository)
+        public CarService(IRepository<Car> repository)
         {
-            _carRepository = carRepository; // ✅
+            _repository = repository;
         }
 
         public async Task<IEnumerable<CarDTOs>> Get()
         {
-            var cars = await _carRepository.Get();
+            var cars = await _repository.Get();
 
-            return cars.Select(car => new CarDTOs() 
+            return cars.Select(car => new CarDTOs
             {
-                 Id = car.CarID,
-                 BrandID = car.BrandID,
-                 Milles = car.Milles,
-                 Model = car.Model
+                Id = car.CarID,
+                BrandID = car.BrandID,
+                Milles = car.Milles,
+                Model = car.Model,
+                Year = car.Year
             });
         }
 
-        public async Task<CarDTOs> Add(CarInsertDTOs carInsertDTOs)
+        public async Task<CarDTOs?> GetById(int id)
         {
-            var car = new Car
-            {
-                BrandID = carInsertDTOs.BrandID,
-                Milles = carInsertDTOs.Milles,
-                Model = carInsertDTOs.Model,
-                Year = carInsertDTOs.Year,
+            var car = await _repository.GetById(id);
+            if (car == null) return null;
 
-            };
-
-            var carDTO = new CarDTOs
+            return new CarDTOs
             {
                 Id = car.CarID,
                 BrandID = car.BrandID,
@@ -46,78 +40,70 @@ namespace Backend.Services
                 Model = car.Model,
                 Year = car.Year
             };
-
-            await _carRepository.Add(car);
-            await _carRepository.Save();
-            return carDTO;
         }
 
-        public async Task<CarDTOs> Update(int Id, CarUpdateDTOs carUpdateDTOs)
+        public async Task<CarDTOs> Add(CarInsertDTOs dto)
         {
-
-            var car = await _carRepository.GetById(Id);
-            
-            if (car != null)
+            var car = new Car
             {
-                car.BrandID = carUpdateDTOs.BrandID;
-                car.Milles = carUpdateDTOs.Milles;
-                car.Model = carUpdateDTOs.Model;
-                car.Year = carUpdateDTOs.Year;
+                BrandID = dto.BrandID,
+                Milles = dto.Milles,
+                Model = dto.Model,
+                Year = dto.Year
+            };
 
-                _carRepository.Update(car);
-                await _carRepository.Save();
+            await _repository.Add(car);
+            await _repository.Save();
 
-                var carDTO = new CarDTOs
-                {
-                    Id = car.CarID,
-                    Milles = car.Milles,
-                    Model = car.Model,
-                    Year = car.Year,
-                };
-
-                return carDTO;
-               
-            }
-            return null;
-
+            return new CarDTOs
+            {
+                Id = car.CarID,
+                BrandID = car.BrandID,
+                Milles = car.Milles,
+                Model = car.Model,
+                Year = car.Year
+            };
         }
-        public async Task<CarDTOs> Delete(int Id)
-        {
-            var car = await _carRepository.GetById(Id);
 
+        public async Task<CarDTOs?> Update(int id, CarUpdateDTOs dto)
+        {
+            var car = await _repository.GetById(id);
             if (car == null) return null;
-                
-            var carDTO = new CarDTOs
-                {
-                    Id = car.CarID,
-                    Milles = car.Milles,
-                    Model = car.Model,
-                    Year = car.Year,
-                };
 
-            _carRepository.Delete(car);
-            await _carRepository.Save();
+            car.BrandID = dto.BrandID;
+            car.Milles = dto.Milles;
+            car.Model = dto.Model;
+            car.Year = dto.Year;
 
-            return carDTO;
-        }
+            _repository.Update(car);
+            await _repository.Save();
 
-        public async Task<CarDTOs> GetById(int Id)
-        {
-            var car = await _carRepository.GetById(Id);
-            if (car != null)
+            return new CarDTOs
             {
-                var carDTO = new CarDTOs
-                {
-                    Id = car.CarID,
-                    Milles = car.Milles,
-                    Model = car.Model,
-                    Year = car.Year,
-                };
-                return carDTO;
-            }
-
-            return null;
+                Id = car.CarID,
+                BrandID = car.BrandID,
+                Milles = car.Milles,
+                Model = car.Model,
+                Year = car.Year
+            };
         }
 
+        public async Task<CarDTOs?> Delete(int id)
+        {
+            var car = await _repository.GetById(id);
+            if (car == null) return null;
+
+            _repository.Delete(car);
+            await _repository.Save();
+
+            return new CarDTOs
+            {
+                Id = car.CarID,
+                BrandID = car.BrandID,
+                Milles = car.Milles,
+                Model = car.Model,
+                Year = car.Year
+            };
+        }
     }
 }

@@ -1,24 +1,23 @@
 ﻿using Backend.DTOs;
-using Backend.Models;
 using Backend.Services;
-using Backend.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+
 namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class CarController : ControllerBase
     {
-        private IValidator<CarInsertDTOs> _carInsertValidator;
-        private IValidator<CarUpdateDTOs> _carUpdateValidator;
-        private ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> _carService;
+        private readonly IValidator<CarInsertDTOs> _carInsertValidator;
+        private readonly IValidator<CarUpdateDTOs> _carUpdateValidator;
+        private readonly ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> _carService;
 
-        public CarController(StoreContext context,
+        public CarController(
             IValidator<CarInsertDTOs> carInsertValidator,
             IValidator<CarUpdateDTOs> carUpdateValidator,
-            [FromKeyedServices("carService")] ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> carService)
+            [FromKeyedServices("carService")]
+            ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> carService)
         {
             _carInsertValidator = carInsertValidator;
             _carUpdateValidator = carUpdateValidator;
@@ -28,64 +27,44 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IEnumerable<CarDTOs>> Get()
         {
-            return await _carService.Get(); 
+            return await _carService.Get();
         }
 
-        [HttpGet("{Id}")]
-        public async Task<ActionResult<CarDTOs>> GetById(int Id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CarDTOs>> GetById(int id)
         {
-            var carDTO = await _carService.GetById(Id);
-
-            return carDTO == null ? NotFound() : Ok(carDTO);
-
+            var car = await _carService.GetById(id);
+            return car == null ? NotFound() : Ok(car);
         }
 
         [HttpPost]
-        public async Task<ActionResult<CarDTOs>> Add(CarInsertDTOs carInsertDTOs)
+        public async Task<ActionResult<CarDTOs>> Add(CarInsertDTOs dto)
         {
-            var validationResult = await _carInsertValidator.ValidateAsync(carInsertDTOs);
+            var validation = await _carInsertValidator.ValidateAsync(dto);
+            if (!validation.IsValid)
+                return BadRequest(validation.Errors);
 
-            if (!validationResult.IsValid) 
-            {
-                return BadRequest(validationResult.Errors);
-            }
+            var car = await _carService.Add(dto);
 
-
-
-            var carDTO = await _carService.Add(carInsertDTOs);
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { Id = carDTO.Id},
-                carDTO
-            );
+            return CreatedAtAction(nameof(GetById), new { id = car.Id }, car);
         }
 
-        [HttpPut("{Id}")]
-        public async Task<ActionResult<CarDTOs>> Update(int Id, CarUpdateDTOs carUpdateDTOs)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CarDTOs>> Update(int id, CarUpdateDTOs dto)
         {
-            var validationResult = await _carUpdateValidator.ValidateAsync(carUpdateDTOs);
+            var validation = await _carUpdateValidator.ValidateAsync(dto);
+            if (!validation.IsValid)
+                return BadRequest(validation.Errors);
 
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(validationResult.Errors);
-            }
-
-            var carDTO = await _carService.Update(Id, carUpdateDTOs);
-
-            return carDTO == null ? NotFound() : Ok(carDTO);
-
+            var car = await _carService.Update(id, dto);
+            return car == null ? NotFound() : Ok(car);
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<CarDTOs>> Delete(int Id)
+        public async Task<ActionResult<CarDTOs>> Delete(int id)
         {
-            var carDTO = await _carService.Delete(Id);
-
-            if (carDTO == null) NotFound();
-
-            return carDTO;
+            var car = await _carService.Delete(id);
+            return car == null ? NotFound() : Ok(car);
         }
-
     }
 }
