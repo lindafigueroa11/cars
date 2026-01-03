@@ -1,30 +1,24 @@
-﻿using Backend.DTOs;
-using Backend.Models;
-using Backend.Repository;
-using Backend.Services;
-using Backend.Validators;
-using FluentValidation;
+﻿using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<StoreContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("StoreConnection")
-    )
-);
-
-builder.Services.AddScoped<IRepository<Car>, CarRepository>();
-
-builder.Services.AddKeyedScoped<
-    ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>,
-    CarService>("carService");
-
-builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
-builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<StoreContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("StoreConnection")
+        ));
+}
+else
+{
+    builder.Services.AddDbContext<StoreContext>(options =>
+        options.UseNpgsql(
+            builder.Configuration.GetConnectionString("StoreConnection")
+        ));
+}
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -33,5 +27,6 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseAuthorization();
 app.MapControllers();
 app.Run();

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -12,11 +12,20 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
+
+		<!-- SQL Server (LOCAL - Windows Auth) -->
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
+
+		<!-- PostgreSQL (PRODUCCIÓN - Render) -->
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+
+		<!-- Tools -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+
+		<!-- Swagger -->
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
 	</ItemGroup>
 

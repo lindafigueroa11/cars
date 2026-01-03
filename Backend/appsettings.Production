@@ -7,7 +7,7 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "StoreConnection": "Host=localhost;Port=5432;Database=carsdb;Username=car_h8in_user;Password=kRC3BVziXflUSFtQKE9sZYgg7akwB6bE"
+    "StoreConnection": "Host=dpg-xxxxx;Port=5432;Database=car_h8in;Username=car_h8in_user;Password=kRC3BVziXflUSFtQKE9sZYgg7akwB6bE;SSL Mode=Require"
   },
   "BaseUrlPost": "https://jsonplaceholder.typicode.com/posts"
 }
