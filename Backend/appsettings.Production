@@ -7,7 +7,7 @@
   },
   "AllowedHosts": "*",
   "ConnectionStrings": {
-    "StoreConnection": "Server=localhost\\SQLEXPRESS;Database=Cars;Trusted_Connection=True;TrustServerCertificate=True"
+    "StoreConnection": "Host=localhost;Port=5432;Database=carsdb;Username=car_h8in_user;Password=kRC3BVziXflUSFtQKE9sZYgg7akwB6bE"
   },
   "BaseUrlPost": "https://jsonplaceholder.typicode.com/posts"
 }
