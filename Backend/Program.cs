@@ -67,19 +67,4 @@ app.UseSwaggerUI();
 
 app.UseAuthorization();
 app.MapControllers();
-
-// =====================
-// MIGRATIONS
-// =====================
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
-    db.Database.Migrate();
-}
-
-// =====================
-// RUN
-// =====================
-
 app.Run();
