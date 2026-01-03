@@ -11,6 +11,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="appsettings.Production.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="appsettings.Production.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
 
 		<!-- SQL Server (LOCAL - Windows Auth) -->

@@ -45,7 +45,6 @@ namespace Backend.Controllers
                 return BadRequest(validation.Errors);
 
             var car = await _carService.Add(dto);
-
             return CreatedAtAction(nameof(GetById), new { id = car.Id }, car);
         }
 
