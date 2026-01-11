@@ -17,5 +17,6 @@ namespace Backend.Models
 
         [ForeignKey("BrandID")]
         public virtual Brand Brand { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
