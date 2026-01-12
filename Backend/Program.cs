@@ -33,6 +33,10 @@ builder.Services.AddKeyedScoped<
 #region Validators
 builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
 builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
+builder.Services.AddScoped<CarLocationRepository>();
+builder.Services.AddScoped<CarLocationService>();
+
+IServiceCollection serviceCollection = builder.Services.AddScoped<IImageService, ImageService>();
 #endregion
 
 #region Cloudinary
