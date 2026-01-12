@@ -32,17 +32,29 @@ namespace Backend.Services
         ======================= */
         public async Task<IEnumerable<CarDTOs>> Get()
         {
-            var cars = await _repository.Get();
+            var cars = await (
+                from car in _context.Cars
+                join location in _context.CarLocations
+                    on car.CarID equals location.CarID
+                select new CarDTOs
+                {
+                    Id = car.CarID,
+                    BrandID = car.BrandID,
+                    Milles = car.Milles,
+                    Model = car.Model,
+                    Year = car.Year,
+                    ImageUrl = car.ImageUrl,
 
-            return cars.Select(car => new CarDTOs
-            {
-                Id = car.CarID,
-                BrandID = car.BrandID,
-                Milles = car.Milles,
-                Model = car.Model,
-                Year = car.Year,
-                ImageUrl = car.ImageUrl
-            });
+                    Latitude = location.Latitude,
+                    Longitude = location.Longitude,
+                    Street = location.Street,
+                    StreetNumber = location.StreetNumber,
+                    Neighborhood = location.Neighborhood,
+                    City = location.City
+                }
+            ).ToListAsync();
+
+            return cars;
         }
 
         /* =======================
@@ -50,19 +62,30 @@ namespace Backend.Services
         ======================= */
         public async Task<CarDTOs?> GetById(int id)
         {
-            var car = await _repository.GetById(id);
-            if (car == null) return null;
+            return await (
+                from car in _context.Cars
+                join location in _context.CarLocations
+                    on car.CarID equals location.CarID
+                where car.CarID == id
+                select new CarDTOs
+                {
+                    Id = car.CarID,
+                    BrandID = car.BrandID,
+                    Milles = car.Milles,
+                    Model = car.Model,
+                    Year = car.Year,
+                    ImageUrl = car.ImageUrl,
 
-            return new CarDTOs
-            {
-                Id = car.CarID,
-                BrandID = car.BrandID,
-                Milles = car.Milles,
-                Model = car.Model,
-                Year = car.Year,
-                ImageUrl = car.ImageUrl
-            };
+                    Latitude = location.Latitude,
+                    Longitude = location.Longitude,
+                    Street = location.Street,
+                    StreetNumber = location.StreetNumber,
+                    Neighborhood = location.Neighborhood,
+                    City = location.City
+                }
+            ).FirstOrDefaultAsync();
         }
+
 
         /* =======================
            CREATE
