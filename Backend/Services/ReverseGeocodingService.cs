@@ -13,7 +13,7 @@ namespace Backend.Services
         }
 
         public async Task<(string street, string number, string neighborhood, string city)>
-            GetAddressAsync(double latitude, double longitude)
+    GetAddressAsync(double latitude, double longitude)
         {
             var url =
                 $"https://nominatim.openstreetmap.org/reverse" +
@@ -28,19 +28,40 @@ namespace Backend.Services
             using var json = await JsonDocument.ParseAsync(stream);
 
             if (!json.RootElement.TryGetProperty("address", out var address))
-            {
                 return ("", "", "", "");
+
+            string Get(params string[] names)
+            {
+                foreach (var name in names)
+                {
+                    if (address.TryGetProperty(name, out var v))
+                    {
+                        var value = v.GetString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                            return value;
+                    }
+                }
+                return "";
             }
 
-            string Get(string name) =>
-                address.TryGetProperty(name, out var v) ? v.GetString() ?? "" : "";
+            var street = Get("road", "pedestrian", "residential");
+            var number = Get("house_number");
 
-            return (
-                street: Get("road"),
-                number: Get("house_number"),
-                neighborhood: Get("neighbourhood"),
-                city: Get("city") != "" ? Get("city") : Get("town")
+            var neighborhood = Get(
+                "neighbourhood",
+                "suburb",
+                "quarter"
             );
+
+            var city = Get(
+                "city",
+                "town",
+                "municipality",
+                "village"
+            );
+
+            return (street, number, neighborhood, city);
         }
+
     }
 }
