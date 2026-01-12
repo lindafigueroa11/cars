@@ -12,16 +12,19 @@ namespace Backend.Services
         private readonly IRepository<Car> _repository;
         private readonly Cloudinary _cloudinary;
         private readonly StoreContext _context;
+        private readonly ReverseGeocodingService _geoService;
 
         public CarService(
             IRepository<Car> repository,
             Cloudinary cloudinary,
-            StoreContext context
+            StoreContext context,
+            ReverseGeocodingService geoService
         )
         {
             _repository = repository;
             _cloudinary = cloudinary;
             _context = context;
+            _geoService = geoService;
         }
 
         /* =======================
@@ -100,16 +103,20 @@ namespace Backend.Services
             await _repository.Add(car);
             await _repository.Save(); // obtiene CarID
 
+            // 📍 Autocompletar dirección si no viene
+            var (street, number, neighborhood, city) =
+                await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
+
             // 📍 Crear ubicación
             var location = new CarLocation
             {
                 CarID = car.CarID,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
-                Street = dto.Street ?? "",
-                StreetNumber = dto.StreetNumber ?? "",
-                Neighborhood = dto.Neighborhood ?? "",
-                City = dto.City ?? ""
+                Street = string.IsNullOrEmpty(dto.Street) ? street : dto.Street,
+                StreetNumber = string.IsNullOrEmpty(dto.StreetNumber) ? number : dto.StreetNumber,
+                Neighborhood = string.IsNullOrEmpty(dto.Neighborhood) ? neighborhood : dto.Neighborhood,
+                City = string.IsNullOrEmpty(dto.City) ? city : dto.City
             };
 
             _context.CarLocations.Add(location);
@@ -134,7 +141,7 @@ namespace Backend.Services
             var car = await _repository.GetById(id);
             if (car == null) return null;
 
-            // 🖼️ Actualizar imagen (opcional)
+            // 🖼️ Imagen opcional
             if (dto.Image != null && dto.Image.Length > 0)
             {
                 if (!dto.Image.ContentType.StartsWith("image/"))
@@ -168,19 +175,20 @@ namespace Backend.Services
 
             if (location == null)
             {
-                location = new CarLocation
-                {
-                    CarID = car.CarID
-                };
+                location = new CarLocation { CarID = car.CarID };
                 _context.CarLocations.Add(location);
             }
 
+            // Autocompletar si no viene
+            var (street, number, neighborhood, city) =
+                await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
+
             location.Latitude = dto.Latitude;
             location.Longitude = dto.Longitude;
-            location.Street = dto.Street ?? "";
-            location.StreetNumber = dto.StreetNumber ?? "";
-            location.Neighborhood = dto.Neighborhood ?? "";
-            location.City = dto.City ?? "";
+            location.Street = string.IsNullOrEmpty(dto.Street) ? street : dto.Street;
+            location.StreetNumber = string.IsNullOrEmpty(dto.StreetNumber) ? number : dto.StreetNumber;
+            location.Neighborhood = string.IsNullOrEmpty(dto.Neighborhood) ? neighborhood : dto.Neighborhood;
+            location.City = string.IsNullOrEmpty(dto.City) ? city : dto.City;
 
             await _context.SaveChangesAsync();
 

@@ -35,6 +35,7 @@ builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
 builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
 builder.Services.AddScoped<CarLocationRepository>();
 builder.Services.AddScoped<CarLocationService>();
+IHttpClientBuilder httpClientBuilder = builder.Services.AddHttpClient<ReverseGeocodingService>();
 
 IServiceCollection serviceCollection = builder.Services.AddScoped<IImageService, ImageService>();
 #endregion
