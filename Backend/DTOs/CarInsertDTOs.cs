@@ -5,19 +5,19 @@ namespace Backend.DTOs
     public class CarInsertDTOs
     {
         public int BrandID { get; set; }
-        public int Milles { get; set; }
+        public string Model { get; set; } = "";
         public int Year { get; set; }
-        public string Model { get; set; } = null!;
+        public decimal Price { get; set; }
+        public decimal Milles { get; set; }
+        public string Color { get; set; } = "";
+        public bool? IsAutomatic { get; set; }
 
-        // 🖼️ Imagen
-        public IFormFile? Image { get; set; }
-
-        // 📍 Ubicación (OBLIGATORIA)
+        // ubicación
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-
-        // 🏠 Dirección (opcional)
         public string? Street { get; set; }
         public string? City { get; set; }
+
+        public IFormFile? Image { get; set; }
     }
 }

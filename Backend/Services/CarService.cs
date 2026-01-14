@@ -32,7 +32,7 @@ namespace Backend.Services
         ======================= */
         public async Task<IEnumerable<CarDTOs>> Get()
         {
-            var cars = await (
+            return await (
                 from car in _context.Cars
                 join location in _context.CarLocations
                     on car.CarID equals location.CarID
@@ -40,19 +40,20 @@ namespace Backend.Services
                 {
                     Id = car.CarID,
                     BrandID = car.BrandID,
-                    Milles = car.Milles,
                     Model = car.Model,
                     Year = car.Year,
+                    Price = car.Price,
+                    Milles = car.Milles,
+                    Color = car.Color,
+                    IsAutomatic = car.IsAutomatic,
+                    PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
-
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
                     City = location.City
                 }
             ).ToListAsync();
-
-            return cars;
         }
 
         /* =======================
@@ -69,11 +70,14 @@ namespace Backend.Services
                 {
                     Id = car.CarID,
                     BrandID = car.BrandID,
-                    Milles = car.Milles,
                     Model = car.Model,
                     Year = car.Year,
+                    Price = car.Price,
+                    Milles = car.Milles,
+                    Color = car.Color,
+                    IsAutomatic = car.IsAutomatic,
+                    PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
-
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
@@ -81,7 +85,6 @@ namespace Backend.Services
                 }
             ).FirstOrDefaultAsync();
         }
-
 
         /* =======================
            CREATE
@@ -113,20 +116,23 @@ namespace Backend.Services
             var car = new Car
             {
                 BrandID = dto.BrandID,
-                Milles = dto.Milles,
                 Model = dto.Model,
                 Year = dto.Year,
-                ImageUrl = imageUrl
+                Price = dto.Price,
+                Milles = dto.Milles,
+                Color = dto.Color,
+                IsAutomatic = dto.IsAutomatic,
+                ImageUrl = imageUrl,
+                PublishedAt = DateTime.UtcNow
             };
 
             await _repository.Add(car);
             await _repository.Save(); // obtiene CarID
 
-            // 📍 Autocompletar dirección si no viene
-            var (street, number, neighborhood, city) =
+            // 📍 Reverse geocoding si faltan datos
+            var (street, city) =
                 await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
 
-            // 📍 Crear ubicación
             var location = new CarLocation
             {
                 CarID = car.CarID,
@@ -143,10 +149,18 @@ namespace Backend.Services
             {
                 Id = car.CarID,
                 BrandID = car.BrandID,
-                Milles = car.Milles,
                 Model = car.Model,
                 Year = car.Year,
-                ImageUrl = car.ImageUrl
+                Price = car.Price,
+                Milles = car.Milles,
+                Color = car.Color,
+                IsAutomatic = car.IsAutomatic,
+                PublishedAt = car.PublishedAt,
+                ImageUrl = car.ImageUrl,
+                Latitude = location.Latitude,
+                Longitude = location.Longitude,
+                Street = location.Street,
+                City = location.City
             };
         }
 
@@ -179,9 +193,12 @@ namespace Backend.Services
 
             // 🚗 Datos del coche
             car.BrandID = dto.BrandID;
-            car.Milles = dto.Milles;
             car.Model = dto.Model;
             car.Year = dto.Year;
+            car.Price = dto.Price;
+            car.Milles = dto.Milles;
+            car.Color = dto.Color;
+            car.IsAutomatic = dto.IsAutomatic;
 
             _repository.Update(car);
             await _repository.Save();
@@ -196,8 +213,7 @@ namespace Backend.Services
                 _context.CarLocations.Add(location);
             }
 
-            // Autocompletar si no viene
-            var (street, number, neighborhood, city) =
+            var (street, city) =
                 await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
 
             location.Latitude = dto.Latitude;
@@ -207,15 +223,7 @@ namespace Backend.Services
 
             await _context.SaveChangesAsync();
 
-            return new CarDTOs
-            {
-                Id = car.CarID,
-                BrandID = car.BrandID,
-                Milles = car.Milles,
-                Model = car.Model,
-                Year = car.Year,
-                ImageUrl = car.ImageUrl
-            };
+            return await GetById(car.CarID);
         }
 
         /* =======================
@@ -233,9 +241,13 @@ namespace Backend.Services
             {
                 Id = car.CarID,
                 BrandID = car.BrandID,
-                Milles = car.Milles,
                 Model = car.Model,
                 Year = car.Year,
+                Price = car.Price,
+                Milles = car.Milles,
+                Color = car.Color,
+                IsAutomatic = car.IsAutomatic,
+                PublishedAt = car.PublishedAt,
                 ImageUrl = car.ImageUrl
             };
         }
