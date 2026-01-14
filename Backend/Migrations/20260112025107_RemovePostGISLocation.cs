@@ -21,8 +21,6 @@ namespace Backend.Migrations
                     Latitude = table.Column<double>(type: "double precision", nullable: false),
                     Longitude = table.Column<double>(type: "double precision", nullable: false),
                     Street = table.Column<string>(type: "text", nullable: false),
-                    StreetNumber = table.Column<string>(type: "text", nullable: false),
-                    Neighborhood = table.Column<string>(type: "text", nullable: false),
                     City = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>

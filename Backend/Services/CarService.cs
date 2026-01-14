@@ -48,8 +48,6 @@ namespace Backend.Services
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
-                    StreetNumber = location.StreetNumber,
-                    Neighborhood = location.Neighborhood,
                     City = location.City
                 }
             ).ToListAsync();
@@ -79,8 +77,6 @@ namespace Backend.Services
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
-                    StreetNumber = location.StreetNumber,
-                    Neighborhood = location.Neighborhood,
                     City = location.City
                 }
             ).FirstOrDefaultAsync();
@@ -137,8 +133,6 @@ namespace Backend.Services
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
                 Street = string.IsNullOrEmpty(dto.Street) ? street : dto.Street,
-                StreetNumber = string.IsNullOrEmpty(dto.StreetNumber) ? number : dto.StreetNumber,
-                Neighborhood = string.IsNullOrEmpty(dto.Neighborhood) ? neighborhood : dto.Neighborhood,
                 City = string.IsNullOrEmpty(dto.City) ? city : dto.City
             };
 
@@ -209,8 +203,6 @@ namespace Backend.Services
             location.Latitude = dto.Latitude;
             location.Longitude = dto.Longitude;
             location.Street = string.IsNullOrEmpty(dto.Street) ? street : dto.Street;
-            location.StreetNumber = string.IsNullOrEmpty(dto.StreetNumber) ? number : dto.StreetNumber;
-            location.Neighborhood = string.IsNullOrEmpty(dto.Neighborhood) ? neighborhood : dto.Neighborhood;
             location.City = string.IsNullOrEmpty(dto.City) ? city : dto.City;
 
             await _context.SaveChangesAsync();

@@ -6,14 +6,13 @@ namespace Backend.Services
 {
     public class CarLocationService
     {
-        private readonly CarLocationRepository _repository;
+        private readonly IRepository<CarLocation> _repository;
 
-        public CarLocationService(CarLocationRepository repository)
+        public CarLocationService(IRepository<CarLocation> repository)
         {
             _repository = repository;
         }
 
-        // Guardar ubicación del coche
         public async Task Add(CarLocationInsertDTOs dto)
         {
             var location = new CarLocation
@@ -21,20 +20,17 @@ namespace Backend.Services
                 CarID = dto.CarID,
                 Latitude = dto.Latitude,
                 Longitude = dto.Longitude,
-                Street = dto.Street,
-                StreetNumber = dto.StreetNumber,
-                Neighborhood = dto.Neighborhood,
-                City = dto.City
+                Street = dto.Street ?? "",
+                City = dto.City ?? ""
             };
 
             await _repository.Add(location);
             await _repository.Save();
         }
 
-        // Obtener ubicaciones para el mapa
         public async Task<IEnumerable<CarLocationMapDTOs>> GetForMap()
         {
-            var locations = await _repository.GetAll();
+            var locations = await _repository.Get();
 
             return locations.Select(l => new CarLocationMapDTOs
             {
