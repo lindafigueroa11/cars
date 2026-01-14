@@ -24,6 +24,7 @@
 
 		<!-- SQL Server (LOCAL - Windows Auth) -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
+		<PackageReference Include="NetTopologySuite" Version="2.6.0" />
 
 		<!-- PostgreSQL (PRODUCCIÓN - Render) -->
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
