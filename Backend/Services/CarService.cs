@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
 {
-    public class CarService : ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>
+    public class CarService : 
+        ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>
     {
         private readonly IRepository<Car> _repository;
         private readonly Cloudinary _cloudinary;
@@ -48,6 +49,7 @@ namespace Backend.Services
                     IsAutomatic = car.IsAutomatic,
                     PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
+
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
@@ -78,6 +80,7 @@ namespace Backend.Services
                     IsAutomatic = car.IsAutomatic,
                     PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
+
                     Latitude = location.Latitude,
                     Longitude = location.Longitude,
                     Street = location.Street,
@@ -93,7 +96,7 @@ namespace Backend.Services
         {
             string? imageUrl = null;
 
-            // 🖼️ Subir imagen
+            // 📸 Subir imagen
             if (dto.Image != null && dto.Image.Length > 0)
             {
                 if (!dto.Image.ContentType.StartsWith("image/"))
@@ -127,11 +130,11 @@ namespace Backend.Services
             };
 
             await _repository.Add(car);
-            await _repository.Save(); // obtiene CarID
+            await _repository.Save();
 
-            // 📍 Reverse geocoding si faltan datos
             var (street, city) =
-                await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
+            await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
+
 
             var location = new CarLocation
             {
@@ -145,23 +148,8 @@ namespace Backend.Services
             _context.CarLocations.Add(location);
             await _context.SaveChangesAsync();
 
-            return new CarDTOs
-            {
-                Id = car.CarID,
-                BrandID = car.BrandID,
-                Model = car.Model,
-                Year = car.Year,
-                Price = car.Price,
-                Milles = car.Milles,
-                Color = car.Color,
-                IsAutomatic = car.IsAutomatic,
-                PublishedAt = car.PublishedAt,
-                ImageUrl = car.ImageUrl,
-                Latitude = location.Latitude,
-                Longitude = location.Longitude,
-                Street = location.Street,
-                City = location.City
-            };
+            return await GetById(car.CarID)
+                   ?? throw new Exception("Error creando el coche");
         }
 
         /* =======================
@@ -172,7 +160,7 @@ namespace Backend.Services
             var car = await _repository.GetById(id);
             if (car == null) return null;
 
-            // 🖼️ Imagen opcional
+            // 📸 Imagen opcional
             if (dto.Image != null && dto.Image.Length > 0)
             {
                 if (!dto.Image.ContentType.StartsWith("image/"))
@@ -191,7 +179,7 @@ namespace Backend.Services
                 car.ImageUrl = uploadResult.SecureUrl.ToString();
             }
 
-            // 🚗 Datos del coche
+            // 🚗 Datos coche
             car.BrandID = dto.BrandID;
             car.Model = dto.Model;
             car.Year = dto.Year;
@@ -215,6 +203,7 @@ namespace Backend.Services
 
             var (street, city) =
                 await _geoService.GetAddressAsync(dto.Latitude, dto.Longitude);
+
 
             location.Latitude = dto.Latitude;
             location.Longitude = dto.Longitude;
