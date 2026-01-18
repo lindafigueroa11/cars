@@ -37,6 +37,8 @@ namespace Backend.Services
                 from car in _context.Cars
                 join location in _context.CarLocations
                     on car.CarID equals location.CarID
+                    into locations
+                from location in locations.DefaultIfEmpty()
                 select new CarDTOs
                 {
                     Id = car.CarID,
@@ -50,13 +52,14 @@ namespace Backend.Services
                     PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
 
-                    Latitude = location.Latitude,
-                    Longitude = location.Longitude,
-                    Street = location.Street,
-                    City = location.City
+                    Latitude = location != null ? location.Latitude : 0,
+                    Longitude = location != null ? location.Longitude : 0,
+                    Street = location != null ? location.Street : "",
+                    City = location != null ? location.City : ""
                 }
             ).ToListAsync();
         }
+
 
         /* =======================
            GET BY ID
@@ -240,5 +243,25 @@ namespace Backend.Services
                 ImageUrl = car.ImageUrl
             };
         }
+
+        /* =======================
+   DELETE ALL
+======================= */
+        public async Task<int> DeleteAll()
+        {
+            // 1️⃣ Borrar ubicaciones primero (FK)
+            var locations = await _context.CarLocations.ToListAsync();
+            _context.CarLocations.RemoveRange(locations);
+
+            // 2️⃣ Borrar coches
+            var cars = await _context.Cars.ToListAsync();
+            _context.Cars.RemoveRange(cars);
+
+            // 3️⃣ Guardar cambios
+            await _context.SaveChangesAsync();
+
+            return cars.Count;
+        }
+
     }
 }
