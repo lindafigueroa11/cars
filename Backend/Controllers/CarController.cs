@@ -11,25 +11,31 @@ namespace Backend.Controllers
     {
         private readonly IValidator<CarInsertDTOs> _carInsertValidator;
         private readonly IValidator<CarUpdateDTOs> _carUpdateValidator;
-        private readonly ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> _carService;
+        private readonly CarService _carService;
 
         public CarController(
             IValidator<CarInsertDTOs> carInsertValidator,
             IValidator<CarUpdateDTOs> carUpdateValidator,
-            [FromKeyedServices("carService")]
-            ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs> carService)
+            CarService carService
+        )
         {
             _carInsertValidator = carInsertValidator;
             _carUpdateValidator = carUpdateValidator;
             _carService = carService;
         }
 
+        /* =======================
+           GET ALL
+        ======================= */
         [HttpGet]
         public async Task<IEnumerable<CarDTOs>> Get()
         {
             return await _carService.Get();
         }
 
+        /* =======================
+           GET BY ID
+        ======================= */
         [HttpGet("{id}")]
         public async Task<ActionResult<CarDTOs>> GetById(int id)
         {
@@ -37,8 +43,11 @@ namespace Backend.Controllers
             return car == null ? NotFound() : Ok(car);
         }
 
+        /* =======================
+           CREATE
+        ======================= */
         [HttpPost]
-        public async Task<ActionResult<CarDTOs>> Add(CarInsertDTOs dto)
+        public async Task<ActionResult<CarDTOs>> Add([FromForm] CarInsertDTOs dto)
         {
             var validation = await _carInsertValidator.ValidateAsync(dto);
             if (!validation.IsValid)
@@ -48,8 +57,11 @@ namespace Backend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = car.Id }, car);
         }
 
+        /* =======================
+           UPDATE
+        ======================= */
         [HttpPut("{id}")]
-        public async Task<ActionResult<CarDTOs>> Update(int id, CarUpdateDTOs dto)
+        public async Task<ActionResult<CarDTOs>> Update(int id, [FromForm] CarUpdateDTOs dto)
         {
             var validation = await _carUpdateValidator.ValidateAsync(dto);
             if (!validation.IsValid)
@@ -59,11 +71,29 @@ namespace Backend.Controllers
             return car == null ? NotFound() : Ok(car);
         }
 
+        /* =======================
+           DELETE ONE
+        ======================= */
         [HttpDelete("{id}")]
         public async Task<ActionResult<CarDTOs>> Delete(int id)
         {
             var car = await _carService.Delete(id);
             return car == null ? NotFound() : Ok(car);
+        }
+
+        /* =======================
+           DELETE ALL
+        ======================= */
+        [HttpDelete("all")]
+        public async Task<IActionResult> DeleteAll()
+        {
+            var deletedCount = await _carService.DeleteAll();
+
+            return Ok(new
+            {
+                message = "Todos los coches han sido eliminados",
+                deleted = deletedCount
+            });
         }
     }
 }

@@ -249,15 +249,12 @@ namespace Backend.Services
 ======================= */
         public async Task<int> DeleteAll()
         {
-            // 1️⃣ Borrar ubicaciones primero (FK)
             var locations = await _context.CarLocations.ToListAsync();
             _context.CarLocations.RemoveRange(locations);
 
-            // 2️⃣ Borrar coches
             var cars = await _context.Cars.ToListAsync();
             _context.Cars.RemoveRange(cars);
 
-            // 3️⃣ Guardar cambios
             await _context.SaveChangesAsync();
 
             return cars.Count;
