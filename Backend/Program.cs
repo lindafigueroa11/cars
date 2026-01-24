@@ -6,41 +6,42 @@ using Backend.Validators;
 
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-
 using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region Database
+/* =======================
+   DATABASE
+======================= */
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("StoreConnection")
     )
 );
-#endregion
 
-#region Repositories
+/* =======================
+   REPOSITORIES
+======================= */
 builder.Services.AddScoped<IRepository<Car>, CarRepository>();
-#endregion
+builder.Services.AddScoped<CarLocationRepository>();
 
-#region Services
-builder.Services.AddKeyedScoped<
-    ICommonService<CarDTOs, CarInsertDTOs, CarUpdateDTOs>,
-    CarService
->("carService");
-#endregion
+/* =======================
+   SERVICES
+======================= */
+builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<CarLocationService>();
+builder.Services.AddHttpClient<ReverseGeocodingService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
-#region Validators
+/* =======================
+   VALIDATORS
+======================= */
 builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
 builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
-builder.Services.AddScoped<CarLocationRepository>();
-builder.Services.AddScoped<CarLocationService>();
-IHttpClientBuilder httpClientBuilder = builder.Services.AddHttpClient<ReverseGeocodingService>();
 
-IServiceCollection serviceCollection = builder.Services.AddScoped<IImageService, ImageService>();
-#endregion
-
-#region Cloudinary
+/* =======================
+   CLOUDINARY
+======================= */
 builder.Services.AddSingleton(sp =>
 {
     var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
@@ -54,31 +55,34 @@ builder.Services.AddSingleton(sp =>
         throw new Exception("Cloudinary environment variables are missing");
     }
 
-    var account = new Account(cloudName, apiKey, apiSecret);
-    return new Cloudinary(account);
+    return new Cloudinary(new Account(cloudName, apiKey, apiSecret));
 });
-#endregion
 
+/* =======================
+   CONTROLLERS & SWAGGER
+======================= */
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-#region Middleware
+/* =======================
+   MIDDLEWARE
+======================= */
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseAuthorization();
 app.MapControllers();
-#endregion
 
-#region Database Migration
+/* =======================
+   MIGRATIONS AUTO APPLY
+======================= */
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
     db.Database.Migrate();
 }
-#endregion
 
 app.Run();
