@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Backend.Services
 {
@@ -12,44 +11,39 @@ namespace Backend.Services
             _http = http;
         }
 
-        public async Task<(string Street, string City)> GetAddressAsync(
-            double latitude,
-            double longitude
-        )
+        public async Task<(string street, string city)> GetAddressAsync(
+            double lat, double lon)
         {
-            var url =
-                $"https://nominatim.openstreetmap.org/reverse" +
-                $"?format=jsonv2&lat={latitude}&lon={longitude}&addressdetails=1";
-
-            _http.DefaultRequestHeaders.UserAgent.ParseAdd("cars-app/1.0");
-
-            var response = await _http.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            using var stream = await response.Content.ReadAsStreamAsync();
-            using var json = await JsonDocument.ParseAsync(stream);
-
-            if (!json.RootElement.TryGetProperty("address", out var address))
-                return ("", "");
-
-            string Get(params string[] names)
+            try
             {
-                foreach (var name in names)
-                {
-                    if (address.TryGetProperty(name, out var v))
-                    {
-                        var value = v.GetString();
-                        if (!string.IsNullOrWhiteSpace(value))
-                            return value;
-                    }
-                }
-                return "";
+                var url =
+                    $"https://nominatim.openstreetmap.org/reverse" +
+                    $"?format=jsonv2&lat={lat}&lon={lon}";
+
+                _http.DefaultRequestHeaders.UserAgent.ParseAdd("cars-app");
+
+                var res = await _http.GetAsync(url);
+                if (!res.IsSuccessStatusCode)
+                    return ("", "");
+
+                using var stream = await res.Content.ReadAsStreamAsync();
+                using var json = await JsonDocument.ParseAsync(stream);
+
+                if (!json.RootElement.TryGetProperty("address", out var addr))
+                    return ("", "");
+
+                string Get(string name) =>
+                    addr.TryGetProperty(name, out var v) ? v.GetString() ?? "" : "";
+
+                return (
+                    Get("road"),
+                    Get("city")
+                );
             }
-
-            var street = Get("road", "pedestrian", "residential");
-            var city = Get("city", "town", "municipality", "village");
-
-            return (street, city);
+            catch
+            {
+                return ("", "");
+            }
         }
     }
 }

@@ -6,9 +6,9 @@ namespace Backend.Models
     public class CarLocation
     {
         [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int CarLocationID { get; set; }
 
-        [ForeignKey("Car")]
         public int CarID { get; set; }
 
         public double Latitude { get; set; }
@@ -17,6 +17,7 @@ namespace Backend.Models
         public string Street { get; set; } = "";
         public string City { get; set; } = "";
 
-        public Car Car { get; set; }
+        [ForeignKey("CarID")]
+        public Car Car { get; set; } = null!;
     }
 }
