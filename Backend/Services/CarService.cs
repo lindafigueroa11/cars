@@ -18,7 +18,7 @@ namespace Backend.Services
         /* =======================
            GET ALL
         ======================= */
-        public async Task<IEnumerable<CarDTOs>> Get()
+        public async Task<IEnumerable<CarResultDTO>> Get()
         {
             return await (
                 from car in _context.Cars
@@ -26,17 +26,14 @@ namespace Backend.Services
                     on car.CarID equals location.CarID
                     into locations
                 from location in locations.DefaultIfEmpty()
-                select new CarDTOs
+                select new CarResultDTO
                 {
-                    Id = car.CarID,
-                    BrandID = car.BrandID,
+                    CarID = car.CarID,
                     Model = car.Model,
                     Year = car.Year,
                     Price = car.Price,
                     Milles = car.Milles,
-                    Color = car.Color,
                     IsAutomatic = car.IsAutomatic,
-                    PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
 
                     Latitude = location != null ? location.Latitude : 0,
@@ -50,7 +47,7 @@ namespace Backend.Services
         /* =======================
            GET BY ID
         ======================= */
-        public async Task<CarDTOs?> GetById(int id)
+        public async Task<CarResultDTO?> GetById(int id)
         {
             return await (
                 from car in _context.Cars
@@ -59,17 +56,14 @@ namespace Backend.Services
                     into locations
                 from location in locations.DefaultIfEmpty()
                 where car.CarID == id
-                select new CarDTOs
+                select new CarResultDTO
                 {
-                    Id = car.CarID,
-                    BrandID = car.BrandID,
+                    CarID = car.CarID,
                     Model = car.Model,
                     Year = car.Year,
                     Price = car.Price,
                     Milles = car.Milles,
-                    Color = car.Color,
                     IsAutomatic = car.IsAutomatic,
-                    PublishedAt = car.PublishedAt,
                     ImageUrl = car.ImageUrl,
 
                     Latitude = location != null ? location.Latitude : 0,
@@ -83,7 +77,7 @@ namespace Backend.Services
         /* =======================
            CREATE
         ======================= */
-        public async Task<CarDTOs> Add(CarInsertDTOs dto)
+        public async Task<CarResultDTO> Add(CarInsertDTOs dto)
         {
             var car = new Car
             {

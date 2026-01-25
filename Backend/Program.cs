@@ -1,29 +1,30 @@
 ﻿using Backend.Models;
 using Backend.Services;
-using Backend.Repository;
 using Backend.DTOs;
 using Backend.Validators;
 
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using CloudinaryDotNet;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 /* =======================
-   DATABASE
+   DATABASE (Render ready)
 ======================= */
-builder.Services.AddDbContext<StoreContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("StoreConnection")
-    )
-);
+var connectionString =
+    Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("StoreConnection");
 
-/* =======================
-   REPOSITORIES
-======================= */
-builder.Services.AddScoped<IRepository<Car>, CarRepository>();
-builder.Services.AddScoped<CarLocationRepository>();
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new Exception("No database connection string configured");
+}
+
+builder.Services.AddDbContext<StoreContext>(options =>
+    options.UseNpgsql(connectionString)
+);
 
 /* =======================
    SERVICES
@@ -59,11 +60,28 @@ builder.Services.AddSingleton(sp =>
 });
 
 /* =======================
-   CONTROLLERS & SWAGGER
+   CONTROLLERS & JSON
 ======================= */
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+/* =======================
+   CORS (safe default)
+======================= */
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
 
 var app = builder.Build();
 
@@ -73,11 +91,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 app.MapControllers();
 
 /* =======================
-   MIGRATIONS AUTO APPLY
+   AUTO MIGRATIONS
 ======================= */
 using (var scope = app.Services.CreateScope())
 {

@@ -22,7 +22,8 @@ namespace Backend.Models
         public bool IsAutomatic { get; set; }
         public string Color { get; set; } = "";
 
-        public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? PublishedAt { get; set; }
+
         public string? ImageUrl { get; set; }
     }
 }
