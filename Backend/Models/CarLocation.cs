@@ -7,7 +7,7 @@ namespace Backend.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int CarLocationID { get; set; }
+        public int Id { get; set; }
 
         public int CarID { get; set; }
 
@@ -17,7 +17,7 @@ namespace Backend.Models
         public string Street { get; set; } = "";
         public string City { get; set; } = "";
 
-        [ForeignKey("CarID")]
+        [ForeignKey(nameof(CarID))]
         public Car Car { get; set; } = null!;
     }
 }
