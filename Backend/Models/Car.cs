@@ -19,7 +19,7 @@ namespace Backend.Models
         [Column(TypeName = "decimal(18,1)")]
         public decimal Milles { get; set; }
 
-        public bool IsAutomatic { get; set; }
+        public bool? IsAutomatic { get; set; }
         public string Color { get; set; } = "";
 
         public DateTime? PublishedAt { get; set; }
