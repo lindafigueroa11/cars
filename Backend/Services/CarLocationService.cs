@@ -1,18 +1,21 @@
 ﻿using Backend.DTOs;
 using Backend.Models;
-using Backend.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services
 {
     public class CarLocationService
     {
-        private readonly IRepository<CarLocation> _repository;
+        private readonly StoreContext _context;
 
-        public CarLocationService(IRepository<CarLocation> repository)
+        public CarLocationService(StoreContext context)
         {
-            _repository = repository;
+            _context = context;
         }
 
+        /* =======================
+           CREATE
+        ======================= */
         public async Task Add(CarLocationInsertDTOs dto)
         {
             var location = new CarLocation
@@ -24,20 +27,23 @@ namespace Backend.Services
                 City = dto.City ?? ""
             };
 
-            await _repository.Add(location);
-            await _repository.Save();
+            _context.CarLocations.Add(location);
+            await _context.SaveChangesAsync();
         }
 
+        /* =======================
+           GET FOR MAP
+        ======================= */
         public async Task<IEnumerable<CarLocationMapDTOs>> GetForMap()
         {
-            var locations = await _repository.Get();
-
-            return locations.Select(l => new CarLocationMapDTOs
-            {
-                CarID = l.CarID,
-                Latitude = l.Latitude,
-                Longitude = l.Longitude
-            });
+            return await _context.CarLocations
+                .Select(l => new CarLocationMapDTOs
+                {
+                    CarID = l.CarID,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude
+                })
+                .ToListAsync();
         }
     }
 }
