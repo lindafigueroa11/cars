@@ -15,6 +15,8 @@ WORKDIR /app
 
 COPY --from=build /out .
 ENV ASPNETCORE_URLS=http://+:10000
+
+
 EXPOSE 10000
 
 ENTRYPOINT ["dotnet", "Backend.dll"]
