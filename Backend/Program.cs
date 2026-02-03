@@ -124,11 +124,12 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Database migrated successfully");
     }
     catch (Exception ex)
-    {
+    { 
         Console.WriteLine("Database migration skipped:");
         Console.WriteLine(ex.Message);
     }
 }
 
+ 
 
 app.Run();
