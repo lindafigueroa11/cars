@@ -11,36 +11,20 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 /* =======================
-   DATABASE (Render ready)
+   DATABASE (Render)
 ======================= */
 
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-string connectionString;
+var connectionString =
+    builder.Configuration.GetConnectionString("StoreConnection");
 
-if (!string.IsNullOrEmpty(databaseUrl))
+if (string.IsNullOrEmpty(connectionString))
 {
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-
-    connectionString =
-        $"Host={uri.Host};" +
-        $"Port={uri.Port};" +
-        $"Database={uri.AbsolutePath.Trim('/')};" +
-        $"Username={userInfo[0]};" +
-        $"Password={userInfo[1]};" +
-        $"SSL Mode=Require;" +
-        $"Trust Server Certificate=true";
-}
-else
-{
-    connectionString = builder.Configuration.GetConnectionString("StoreConnection")
-        ?? throw new Exception("No database connection string configured");
+    throw new Exception("ConnectionStrings__StoreConnection no está configurada en Render");
 }
 
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseNpgsql(connectionString)
 );
-
 
 /* =======================
    SERVICES
@@ -101,7 +85,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
 /* =======================
    MIDDLEWARE
 ======================= */
@@ -125,12 +108,10 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Database migrated successfully");
     }
     catch (Exception ex)
-    { 
+    {
         Console.WriteLine("Database migration skipped:");
         Console.WriteLine(ex.Message);
     }
 }
-
- 
 
 app.Run();
