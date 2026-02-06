@@ -8,7 +8,8 @@ namespace Backend.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CarID { get; set; }
-
+        public int UserId { get; set; }
+        public User User { get; set; } = null!;
         public string Model { get; set; } = "";
         public int BrandID { get; set; }
         public int Year { get; set; }
