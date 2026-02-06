@@ -5,22 +5,24 @@ using Backend.Validators;
 
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Migrations;
 using CloudinaryDotNet;
 using System.Text.Json.Serialization;
+
+Console.WriteLine("=== APP STARTING ===");
 
 var builder = WebApplication.CreateBuilder(args);
 
 /* =======================
-   DATABASE (Render)
+   DATABASE
 ======================= */
 
 var connectionString =
-    builder.Configuration.GetConnectionString("StoreConnection");
-
-if (string.IsNullOrEmpty(connectionString))
-{
-    throw new Exception("ConnectionStrings__StoreConnection no está configurada en Render");
-}
+    Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? builder.Configuration.GetConnectionString("StoreConnection")
+    ?? throw new Exception("No database connection string configured");
 
 builder.Services.AddDbContext<StoreContext>(options =>
     options.UseNpgsql(connectionString)
@@ -73,7 +75,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 /* =======================
-   CORS (safe default)
+   CORS
 ======================= */
 builder.Services.AddCors(options =>
 {
@@ -86,6 +88,35 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 /* =======================
+   AUTO DB FIX (PRICE)
+======================= */
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        Console.WriteLine("=== ENSURING PRICE COLUMN ===");
+
+        var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
+
+        db.Database.ExecuteSqlRaw("""
+            ALTER TABLE "Cars"
+            ADD COLUMN IF NOT EXISTS "Price" numeric NOT NULL DEFAULT 0;
+        """);
+
+        Console.WriteLine("=== PRICE COLUMN OK ===");
+
+        // Apply EF migrations if any
+        db.Database.Migrate();
+        Console.WriteLine("=== MIGRATIONS OK ===");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("=== DB INIT ERROR ===");
+        Console.WriteLine(ex.ToString());
+    }
+}
+
+/* =======================
    MIDDLEWARE
 ======================= */
 app.UseSwagger();
@@ -95,23 +126,5 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 app.MapControllers();
-
-/* =======================
-   AUTO MIGRATIONS
-======================= */
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
-        db.Database.Migrate();
-        Console.WriteLine("Database migrated successfully");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("Database migration skipped:");
-        Console.WriteLine(ex.Message);
-    }
-}
 
 app.Run();
