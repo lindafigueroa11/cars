@@ -86,15 +86,12 @@ var app = builder.Build();
 
 /* =======================
    AUTO DB FIX (FOR DEVELOPMENT)
-   (SIN CONSOLA, SIN MIGRATIONS MANUALES)
 ======================= */
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
-
-        // --- FORCE SCHEMA TO MATCH MODELS ---
 
         db.Database.ExecuteSqlRaw("""
             ALTER TABLE "Cars"
@@ -108,6 +105,11 @@ using (var scope = app.Services.CreateScope())
 
         db.Database.ExecuteSqlRaw("""
             ALTER TABLE "Cars"
+            ADD COLUMN IF NOT EXISTS "Color" text;
+        """);
+
+        db.Database.ExecuteSqlRaw("""
+            ALTER TABLE "Cars"
             ADD COLUMN IF NOT EXISTS "PublishedAt" timestamp with time zone;
         """);
 
@@ -116,7 +118,6 @@ using (var scope = app.Services.CreateScope())
             ADD COLUMN IF NOT EXISTS "ImageUrl" text;
         """);
 
-        // Apply any pending EF migrations (if they exist)
         db.Database.Migrate();
 
         Console.WriteLine("=== DATABASE READY ===");
