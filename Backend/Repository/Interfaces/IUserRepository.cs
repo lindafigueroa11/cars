@@ -1,6 +1,6 @@
 ﻿using Backend.Models;
 
-namespace Backend.Repository.Interface
+namespace Backend.Repository.Interfaces
 {
     public interface IUserRepository
     {
@@ -10,5 +10,4 @@ namespace Backend.Repository.Interface
         Task UpdateAsync(User user);
         Task DeleteAsync(User user);
     }
-
 }

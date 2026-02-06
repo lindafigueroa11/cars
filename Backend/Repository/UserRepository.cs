@@ -1,7 +1,6 @@
 ﻿using Backend.Models;
-using Backend.Repository.Interface;
+using Backend.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Backend.Repository
 {
@@ -39,5 +38,4 @@ namespace Backend.Repository
             await _context.SaveChangesAsync();
         }
     }
-
 }

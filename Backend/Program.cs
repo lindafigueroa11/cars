@@ -1,12 +1,15 @@
-﻿using Backend.Models;
-using Backend.Services;
+﻿using System.Text.Json.Serialization;
 using Backend.DTOs;
+using Backend.Models;
+using Backend.Repository;
+using Backend.Repository.Interfaces;
+using Backend.Repository.Interfaces;
+using Backend.Services;
+using Backend.Services.Interfaces;
 using Backend.Validators;
-
+using CloudinaryDotNet;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using CloudinaryDotNet;
-using System.Text.Json.Serialization;
 
 Console.WriteLine("=== APP STARTING ===");
 
@@ -32,6 +35,8 @@ builder.Services.AddScoped<CarService>();
 builder.Services.AddScoped<CarLocationService>();
 builder.Services.AddHttpClient<ReverseGeocodingService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 /* =======================
    VALIDATORS
@@ -118,7 +123,7 @@ using (var scope = app.Services.CreateScope())
             ADD COLUMN IF NOT EXISTS "ImageUrl" text;
         """);
 
-        db.Database.Migrate();
+        
 
         Console.WriteLine("=== DATABASE READY ===");
     }

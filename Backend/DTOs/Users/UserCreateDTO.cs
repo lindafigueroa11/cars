@@ -8,5 +8,6 @@
         public string Password { get; set; } = null!;
         public string? PhoneNumber { get; set; }
         public bool SaleCar { get; set; }
+        public bool IsActive { get; set; }
     }
 }

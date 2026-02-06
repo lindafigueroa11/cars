@@ -10,5 +10,4 @@ namespace Backend.Services.Interfaces
         Task Update(int id, UserUpdateDTO dto);
         Task Delete(int id);
     }
-
 }
