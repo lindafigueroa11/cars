@@ -5,9 +5,6 @@ using Backend.Validators;
 
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Migrations;
 using CloudinaryDotNet;
 using System.Text.Json.Serialization;
 
@@ -88,30 +85,45 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 /* =======================
-   AUTO DB FIX (PRICE)
+   AUTO DB FIX (FOR DEVELOPMENT)
+   (SIN CONSOLA, SIN MIGRATIONS MANUALES)
 ======================= */
 using (var scope = app.Services.CreateScope())
 {
     try
     {
-        Console.WriteLine("=== ENSURING PRICE COLUMN ===");
-
         var db = scope.ServiceProvider.GetRequiredService<StoreContext>();
+
+        // --- FORCE SCHEMA TO MATCH MODELS ---
 
         db.Database.ExecuteSqlRaw("""
             ALTER TABLE "Cars"
             ADD COLUMN IF NOT EXISTS "Price" numeric NOT NULL DEFAULT 0;
         """);
 
-        Console.WriteLine("=== PRICE COLUMN OK ===");
+        db.Database.ExecuteSqlRaw("""
+            ALTER TABLE "Cars"
+            ADD COLUMN IF NOT EXISTS "IsAutomatic" boolean;
+        """);
 
-        // Apply EF migrations if any
+        db.Database.ExecuteSqlRaw("""
+            ALTER TABLE "Cars"
+            ADD COLUMN IF NOT EXISTS "PublishedAt" timestamp with time zone;
+        """);
+
+        db.Database.ExecuteSqlRaw("""
+            ALTER TABLE "Cars"
+            ADD COLUMN IF NOT EXISTS "ImageUrl" text;
+        """);
+
+        // Apply any pending EF migrations (if they exist)
         db.Database.Migrate();
-        Console.WriteLine("=== MIGRATIONS OK ===");
+
+        Console.WriteLine("=== DATABASE READY ===");
     }
     catch (Exception ex)
     {
-        Console.WriteLine("=== DB INIT ERROR ===");
+        Console.WriteLine("=== DATABASE INIT ERROR ===");
         Console.WriteLine(ex.ToString());
     }
 }
