@@ -22,6 +22,7 @@
 	<ItemGroup>
 		<PackageReference Include="CloudinaryDotNet" Version="1.27.9" />
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
 
 		<!-- SQL Server (LOCAL - Windows Auth) -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
@@ -38,6 +39,7 @@
 
 		<!-- Swagger -->
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
 	</ItemGroup>
 
 </Project>
