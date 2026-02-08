@@ -22,7 +22,7 @@
 	<ItemGroup>
 		<PackageReference Include="CloudinaryDotNet" Version="1.27.9" />
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
 
 		<!-- SQL Server (LOCAL - Windows Auth) -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />

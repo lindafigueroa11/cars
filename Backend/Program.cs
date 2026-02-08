@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
-using Backend.DTOs;
 using Backend.Models;
 using Backend.Repository;
 using Backend.Repository.Interfaces;
@@ -30,6 +29,18 @@ builder.Services.AddDbContext<StoreContext>(options =>
 );
 
 /* =======================
+   SERVICES
+======================= */
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<CarService>();
+builder.Services.AddScoped<CarLocationService>();
+builder.Services.AddHttpClient<ReverseGeocodingService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+
+/* =======================
    JWT AUTH
 ======================= */
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -55,45 +66,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 /* =======================
-   SERVICES
-======================= */
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<CarService>();
-builder.Services.AddScoped<CarLocationService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddHttpClient<ReverseGeocodingService>();
-
-/* =======================
-   VALIDATORS
-======================= */
-builder.Services.AddScoped<IValidator<CarInsertDTOs>, CarInsertValidator>();
-builder.Services.AddScoped<IValidator<CarUpdateDTOs>, CarUpdateValidator>();
-
-/* =======================
-   CLOUDINARY
-======================= */
-builder.Services.AddSingleton(sp =>
-{
-    var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
-    var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
-    var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
-
-    if (string.IsNullOrEmpty(cloudName) ||
-        string.IsNullOrEmpty(apiKey) ||
-        string.IsNullOrEmpty(apiSecret))
-        throw new Exception("Cloudinary env vars missing");
-
-    return new Cloudinary(new Account(cloudName, apiKey, apiSecret));
-});
-
-/* =======================
    CONTROLLERS
 ======================= */
 builder.Services.AddControllers()
-    .AddJsonOptions(o =>
-        o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    .AddJsonOptions(x =>
+        x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -101,9 +78,9 @@ builder.Services.AddSwaggerGen();
 /* =======================
    CORS
 ======================= */
-builder.Services.AddCors(o =>
+builder.Services.AddCors(options =>
 {
-    o.AddPolicy("AllowAll", p =>
+    options.AddPolicy("AllowAll", p =>
         p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
 
