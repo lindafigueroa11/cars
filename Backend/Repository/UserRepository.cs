@@ -13,6 +13,12 @@ namespace Backend.Repository
             _context = context;
         }
 
+        public Task<User?> GetByEmailAsync(string email) =>
+            _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        public Task<User?> GetByIdAsync(int id) =>
+            _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+
         public async Task<User> AddAsync(User user)
         {
             _context.Users.Add(user);
@@ -20,21 +26,9 @@ namespace Backend.Repository
             return user;
         }
 
-        public Task<User?> GetByIdAsync(int id) =>
-            _context.Users.FirstOrDefaultAsync(x => x.Id == id);
-
-        public Task<List<User>> GetAllAsync() =>
-            _context.Users.ToListAsync();
-
         public async Task UpdateAsync(User user)
         {
             _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(User user)
-        {
-            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
     }

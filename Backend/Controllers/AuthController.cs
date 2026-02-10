@@ -1,4 +1,4 @@
-﻿using Backend.DTOs.Users;
+﻿using Backend.DTOs.Auth;
 using Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +13,10 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDTO dto)
+    [HttpPost("google")]
+    public async Task<IActionResult> LoginGoogle(LoginGoogleDTO dto)
     {
-        return Ok(await _authService.Login(dto));
+        var result = await _authService.LoginWithGoogle(dto);
+        return Ok(result);
     }
 }

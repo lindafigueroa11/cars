@@ -1,9 +1,9 @@
-﻿using Backend.DTOs.Users;
+﻿using Backend.DTOs.Auth;
 
 namespace Backend.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDTO> Login(LoginDTO dto);
+        Task<AuthResponseDTO> LoginWithGoogle(LoginGoogleDTO dto);
     }
 }
